@@ -16,9 +16,8 @@ if (0) {
 
 sub top {
 	my ($h, $n) = @_;
-	$n //= 5;
-	my @r = grep defined, (sort { $h->{$b} <=> $h->{$a} } keys %$h);
-	$n ? @r[0..($n-1)] : @r;
+	$n ||= 5;
+	grep defined, (sort { $h->{$b} <=> $h->{$a} } keys %$h)[0..($n-1)];
 }
 
 @mo_map{qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)} = 1 .. 12;
