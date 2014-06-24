@@ -86,8 +86,9 @@ bad_ref
 	my $uniq = scalar(keys %{$r{$k}});
 	my @top = top($r{$k});
 	my $width = max map { length $_ } @top;
+	$width = 64 if $width > 64;
 	print "$k ($uniq unique):\n";
-	printf "%-${width}s ... %d\n", $_, $r{$k}{$_} for @top;
+	printf "%-${width}.${width}s ... %d\n", $_, $r{$k}{$_} for @top;
 	print "\n";
 };
 
