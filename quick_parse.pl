@@ -64,18 +64,7 @@ while(<>) {
 
 }
 
-for my $k ( grep { $gi || !(/geo/) } qw(
-day
-ip
-refer
-resp
-geo
-geo_resp
-good_req
-bad_req
-good_ref
-bad_ref
-)) {
+for my $k ( grep { $gi || !(/geo/) } sort keys %r) {
 	my $uniq = scalar(keys %{$r{$k}});
 	my @top = top($r{$k});
 	next if !@top;
