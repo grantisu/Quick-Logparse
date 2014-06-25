@@ -40,25 +40,25 @@ while(<>) {
 
 	my ($date, $time) = parse_date($odate);
 
-	$r{day}{$date}++;
-	$r{ip}{$ip}++;
-	$r{uri}{$uri}++;
-	$r{resp}{$resp}++;
-	$r{refer}{$refer}++;
+	$r{'05 day'}{$date}++;
+	$r{'10 ip'}{$ip}++;
+	$r{'15 uri'}{$uri}++;
+	$r{'20 response'}{$resp}++;
+	$r{'25 referer'}{$refer}++;
 
-	$r{proxy}{$proxy}++ if $proxy;
+	$r{'30 proxy'}{$proxy}++ if $proxy;
 	if ($resp eq '200') {
-		$r{good_req}{$uri}++;
-		$r{good_ref}{"$refer => ".$uri}++ if $refer ne '-';
+		$r{'35 good_req'}{$uri}++;
+		$r{'45 good_ref'}{"$refer => ".$uri}++ if $refer ne '-';
 	} else {
-		$r{bad_req}{"$resp: ".$uri}++;
-		$r{bad_ref}{"$refer => ".$uri}++ if $refer ne '-';
+		$r{'40 bad_req'}{"$resp: ".$uri}++;
+		$r{'45 bad_ref'}{"$refer => ".$uri}++ if $refer ne '-';
 	}
 
 	if ($gi) {
 		my $geo = $gi->country_code_by_addr($ip) || '??';
-		$r{geo}{$geo}++;
-		$r{geo_resp}{"$geo $resp"}++;
+		$r{'12 geo'}{$geo}++;
+		$r{'22 geo_resp'}{"$geo $resp"}++;
 		# $r{geo_hr}{"$geo - ".$date->hour}++;
 	}
 
@@ -70,7 +70,8 @@ for my $k ( grep { $gi || !(/geo/) } sort keys %r) {
 	next if !@top;
 	my $width = max map { length $_ } @top;
 	$width = 64 if $width > 64;
-	print "$k ($uniq unique):\n";
+	my $pk = $k =~ /^[0-9]* (.*)/ ? $1 : $k;
+	print "$pk ($uniq unique):\n";
 	printf "%-${width}.${width}s ... %d\n", $_, $r{$k}{$_} for @top;
 	print "\n";
 };
