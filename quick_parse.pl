@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use List::Util qw(max);
-use DateTime;
+use POSIX qw(mktime strftime);
 use HTTP::Request;
 
 my ($gi, %r, %mo_map);
@@ -20,34 +20,27 @@ sub top {
 	grep defined, (sort { $h->{$b} <=> $h->{$a} } keys %$h)[0..($n-1)];
 }
 
-@mo_map{qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)} = 1 .. 12;
+@mo_map{qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)} = 0 .. 11;
 # 24/Mar/2014:07:25:18 -0400
 sub parse_date {
 	my ($date) = @_;
 
 	my ($dy, $mo, $yr, $hr, $mn, $sc, $tz) = $date =~ qr|^(\d*)/(\w*)/(\d*):(\d*):(\d*):(\d*) (.*)|;
 
-	DateTime->new(
-	year      => $yr,
-	month     => $mo_map{$mo},
-	day       => $dy,
-	hour      => $hr,
-	minute    => $mn,
-	second    => $sc,
-	time_zone => $tz
-	);
+	local $ENV{TZ} = $tz;
+	split ' ', strftime("%F %T", gmtime POSIX::mktime($sc, $mn, $hr, $dy, $mo_map{$mo}, $yr-1900, -1, -1, -1));
 }
 
 while(<>) {
 	my $proxy = s/^([\w.]+), // ? $1 : undef;
-	my ($ip, $date, $full_req, $resp, $sz, $refer) = /^(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\S*) (\S*) "([^"]*)"/;
+	my ($ip, $odate, $full_req, $resp, $sz, $refer) = /^(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\S*) (\S*) "([^"]*)"/;
 	my $req = HTTP::Request->parse($full_req);
 	my $uri = $req->uri // '<UNDEF>';
 	$uri =~ s/\?$//;
 
-	$date = parse_date($date);
+	my ($date, $time) = parse_date($odate);
 
-	$r{day}{$date->ymd}++;
+	$r{day}{$date}++;
 	$r{ip}{$ip}++;
 	$r{uri}{$uri}++;
 	$r{resp}{$resp}++;
