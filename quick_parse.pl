@@ -33,7 +33,9 @@ sub parse_date {
 while(<>) {
 	my $proxy = s/^([\w.]+), // ? $1 : undef;
 	my ($ip, $odate, $full_req, $resp, $sz, $refer) = /^(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\S*) (\S*) "([^"]*)"/;
-	my ($method, $uri, $protocol) = split ' ', $full_req;
+	my ($method, $uri, $protocol) = $full_req =~ /^[A-Z]+ / ?
+		split ' ', $full_req :
+		qw(<UNDEF> <UNDEF> <UNDEF>);
 	my $qparam = $uri =~ s/\?(.*)// ? $1 : undef;
 
 	my ($date, $time) = parse_date($odate);
