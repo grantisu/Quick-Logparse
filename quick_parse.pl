@@ -42,11 +42,9 @@ while(<>) {
 
 	$r{'05 day'}{$date}++;
 	$r{'10 ip'}{$ip}++;
-	$r{'15 uri'}{$uri}++;
 	$r{'20 response'}{$resp}++;
 	$r{'25 referer'}{$refer}++;
 
-	$r{'30 proxy'}{$proxy}++ if $proxy;
 	if ($resp eq '200') {
 		$r{'35 good_req'}{$uri}++;
 		$r{'45 good_ref'}{"$refer => ".$uri}++ if $refer ne '-';
@@ -59,7 +57,6 @@ while(<>) {
 		my $geo = $gi->country_code_by_addr($ip) || '??';
 		$r{'12 geo'}{$geo}++;
 		$r{'22 geo_resp'}{"$geo $resp"}++;
-		# $r{geo_hr}{"$geo - ".$date->hour}++;
 	}
 
 }
