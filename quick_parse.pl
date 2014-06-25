@@ -5,7 +5,6 @@ use warnings;
 
 use List::Util qw(max);
 use POSIX qw(mktime strftime);
-use HTTP::Request;
 
 my ($gi, %r, %mo_map);
 
@@ -34,9 +33,8 @@ sub parse_date {
 while(<>) {
 	my $proxy = s/^([\w.]+), // ? $1 : undef;
 	my ($ip, $odate, $full_req, $resp, $sz, $refer) = /^(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\S*) (\S*) "([^"]*)"/;
-	my $req = HTTP::Request->parse($full_req);
-	my $uri = $req->uri // '<UNDEF>';
-	$uri =~ s/\?$//;
+	my ($method, $uri, $protocol) = split ' ', $full_req;
+	my $qparam = $uri =~ s/\?(.*)// ? $1 : undef;
 
 	my ($date, $time) = parse_date($odate);
 
