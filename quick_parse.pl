@@ -50,7 +50,7 @@ while(<>) {
 	$r{'20 response'}{$resp}++;
 	$r{'25 referer'}{$refer}++;
 
-	if ($resp eq '200') {
+	if ($resp < 400) {
 		$r{'35 good_req'}{$uri}++;
 		$r{'45 good_ref'}{"$refer => ".$uri}++ if $refer ne '-';
 	} else {
