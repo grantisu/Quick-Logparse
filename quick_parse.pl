@@ -6,11 +6,16 @@ use warnings;
 use List::Util qw(max);
 use POSIX qw(mktime strftime);
 
-my ($gi, %r, %mo_map);
+my ($gi, $uap, %r, %mo_map);
 
 if (0) {
 	require Geo::IP::PurePerl;
 	$gi = Geo::IP::PurePerl->new(Geo::IP::PurePerl::GEOIP_MEMORY_CACHE());
+}
+
+if (0) {
+	require HTTP::UserAgentString::Parser;
+	$uap = HTTP::UserAgentString::Parser->new();
 }
 
 sub top {
@@ -37,7 +42,7 @@ while(<>) {
 		push @proxies, $1;
 	}
 
-	my ($ip, $odate, $full_req, $resp, $sz, $refer) = /
+	my ($ip, $odate, $full_req, $resp, $sz, $refer, $ua) = /
 		^(\S+)        [ ]# IP
 		\S+           [ ]# -
 		\S+           [ ]# remote user
@@ -46,6 +51,7 @@ while(<>) {
 		(\S*)         [ ]# response code
 		(\S*)         [ ]# bytes sent
 		"([^"]*)"     [ ]# referer
+		"([^"]*)"        # user agent
 	/x;
 	my ($method, $uri, $protocol) = $full_req =~ /^[A-Z]+ / ?
 		split ' ', $full_req :
@@ -67,6 +73,18 @@ while(<>) {
 
 	$r{'20 response'}{$resp}++;
 	$r{'25 referer'}{$refer}++;
+
+	if ($uap) {
+		my $agent = $uap->parse($ua);
+		my $astr = $agent ?
+			($agent->name || '<UNDEF>') . ' ' . (
+				$agent->isRobot ?
+					'ROBOT' :
+					$agent->version || '???'
+			) :
+			'<UNDEF>';
+		$r{'30 agent'}{$astr}++;
+	}
 
 	if ($resp < 400) {
 		$r{'35 good_req'}{$uri}++;
