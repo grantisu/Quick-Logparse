@@ -32,7 +32,7 @@ sub parse_date {
 
 while(<>) {
 
-	my @proxies;
+	my ($geo, @proxies);
 	while( s/^([\w.]+), // ) {
 		push @proxies, $1;
 	}
@@ -46,7 +46,16 @@ while(<>) {
 	my ($date, $time) = parse_date($odate);
 
 	$r{'05 day'}{$date}++;
-	$r{'10 ip'}{$ip}++;
+
+	if (!$gi) {
+		$r{'10 ip'}{$ip}++;
+	} else {
+		$geo = $gi->country_code_by_addr($ip) || '??';
+		$r{'11 ip_geo'}{"$ip ($geo)"}++;
+		$r{'12 geo'}{$geo}++;
+		$r{'22 geo_resp'}{"$geo $resp"}++;
+	}
+
 	$r{'20 response'}{$resp}++;
 	$r{'25 referer'}{$refer}++;
 
@@ -57,13 +66,6 @@ while(<>) {
 		$r{'40 bad_req'}{"$resp: ".$uri}++;
 		$r{'45 bad_ref'}{"$refer => ".$uri}++ if $refer ne '-';
 	}
-
-	if ($gi) {
-		my $geo = $gi->country_code_by_addr($ip) || '??';
-		$r{'12 geo'}{$geo}++;
-		$r{'22 geo_resp'}{"$geo $resp"}++;
-	}
-
 }
 
 for my $k ( grep { $gi || !(/geo/) } sort keys %r) {
