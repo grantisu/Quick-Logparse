@@ -37,7 +37,16 @@ while(<>) {
 		push @proxies, $1;
 	}
 
-	my ($ip, $odate, $full_req, $resp, $sz, $refer) = /^(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\S*) (\S*) "([^"]*)"/;
+	my ($ip, $odate, $full_req, $resp, $sz, $refer) = /
+		^(\S+)        [ ]# IP
+		\S+           [ ]# -
+		\S+           [ ]# remote user
+		\[([^\]]*)\]  [ ]# timestamp
+		"([^"]*)"     [ ]# request
+		(\S*)         [ ]# response code
+		(\S*)         [ ]# bytes sent
+		"([^"]*)"     [ ]# referer
+	/x;
 	my ($method, $uri, $protocol) = $full_req =~ /^[A-Z]+ / ?
 		split ' ', $full_req :
 		qw(<UNDEF> <UNDEF> <UNDEF>);
